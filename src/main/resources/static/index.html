@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot with Knowledge</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <main class="page">
+        <header class="page-header">
+            <h1 class="page-title">Chatbot with Knowledge</h1>
+            <p class="page-subtitle">Ask a question and get an answer from the knowledge base.</p>
+        </header>
+
+        <section class="chat-card" aria-label="Chatbot">
+            <!-- Area where the answers will be written -->
+            <div id="answers" class="answers" aria-live="polite">
+                <!-- Example question & answer -->
+                <div class="qa-pair">
+                    <div class="message message--question">
+                        <span class="message-label">You</span>
+                        <p>What is this chatbot for?</p>
+                    </div>
+                    <div class="message message--answer">
+                        <span class="message-label">Chatbot</span>
+                        <p>This is an example answer. The chatbot replies to your questions using its knowledge base. Type your question below to get started.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Textbox where to write questions -->
+            <form class="question-form" action="#" method="post">
+                <label class="visually-hidden" for="question">Your question</label>
+                <textarea id="question" name="question" class="question-input" rows="3"
+                          placeholder="Type your question here..." required></textarea>
+                <button type="submit" class="send-button">Send</button>
+            </form>
+        </section>
+
+        <footer class="page-footer">
+            <small>&copy; 2026 Chatbot with Knowledge</small>
+        </footer>
+    </main>
+</body>
+</html>

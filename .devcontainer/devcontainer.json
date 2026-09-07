@@ -1,23 +1,17 @@
 {
   "name": "Kotlin Spring Boot Dev Container",
-  "image": "mcr.microsoft.com/devcontainers/java:17-bullseye",
-  "features": {
-    "ghcr.io/devcontainers/features/java:1": {
-      "version": "17",
-      "jdkDistro": "temurin"
-    }
-  },
+  "image": "mcr.microsoft.com/devcontainers/java:20-bullseye",
   "customizations": {
     "vscode": {
       "settings": {
         "java.configuration.runtimes": [
           {
-            "name": "JavaSE-17",
-            "path": "/usr/lib/jvm/msopenjdk-17",
+            "name": "JavaSE-20",
+            "path": "/usr/lib/jvm/msopenjdk-20",
             "default": true
           }
         ],
-        "kotlin.compiler.jvm.target": "17"
+        "kotlin.compiler.jvm.target": "20"
       },
       "extensions": [
         "fwcd.kotlin",

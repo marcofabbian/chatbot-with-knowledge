@@ -10,7 +10,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(20))
     }
 }
 
@@ -21,7 +21,10 @@ repositories {
 dependencies {
     // Spring Boot Starter
     implementation("org.springframework.boot:spring-boot-starter")
-    
+
+    // Spring Boot Web Starter (serves the chatbot page)
+    implementation("org.springframework.boot:spring-boot-starter-web")
+
     // Kotlin reflection support
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
