@@ -1,0 +1,33 @@
+{
+  "name": "Kotlin Spring Boot Dev Container",
+  "image": "mcr.microsoft.com/devcontainers/java:17-bullseye",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17",
+      "jdkDistro": "temurin"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "java.configuration.runtimes": [
+          {
+            "name": "JavaSE-17",
+            "path": "/usr/lib/jvm/msopenjdk-17",
+            "default": true
+          }
+        ],
+        "kotlin.compiler.jvm.target": "17"
+      },
+      "extensions": [
+        "fwcd.kotlin",
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-spring-boot-pack",
+        "vscjava.vscode-gradle"
+      ]
+    }
+  },
+  "forwardPorts": [8080],
+  "postCreateCommand": "./gradlew --version",
+  "remoteUser": "vscode"
+}
