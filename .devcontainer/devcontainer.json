@@ -1,17 +1,19 @@
 {
   "name": "Kotlin Spring Boot Dev Container",
-  "image": "mcr.microsoft.com/devcontainers/java:20-bullseye",
+  "image": "mcr.microsoft.com/devcontainers/java:1-17-bookworm",
   "customizations": {
     "vscode": {
       "settings": {
+        "java.jdt.ls.java.home": "/usr/lib/jvm/msopenjdk-current",
+        "kotlin.java.home": "/usr/lib/jvm/msopenjdk-current",
         "java.configuration.runtimes": [
           {
-            "name": "JavaSE-20",
-            "path": "/usr/lib/jvm/msopenjdk-20",
+            "name": "JavaSE-17",
+            "path": "/usr/lib/jvm/msopenjdk-current",
             "default": true
           }
         ],
-        "kotlin.compiler.jvm.target": "20"
+        "kotlin.compiler.jvm.target": "17"
       },
       "extensions": [
         "fwcd.kotlin",
@@ -22,6 +24,6 @@
     }
   },
   "forwardPorts": [8080],
-  "postCreateCommand": "./gradlew --version",
+  "postCreateCommand": "./gradlew bootRun",
   "remoteUser": "vscode"
 }

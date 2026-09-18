@@ -1,7 +1,7 @@
 # Multi-stage build for Kotlin Spring Boot application
 
 # Stage 1: Build the application
-FROM eclipse-temurin:20-jdk-jammy AS builder
+FROM mcr.microsoft.com/devcontainers/java:1-21-bookworm AS builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ COPY src /app/src
 RUN ./gradlew bootJar --no-daemon -x test
 
 # Stage 2: Minimal runtime image
-FROM eclipse-temurin:20-jre-jammy
+FROM mcr.microsoft.com/devcontainers/java:1-21-bookworm
 
 WORKDIR /app
 
@@ -28,5 +28,8 @@ USER spring:spring
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 EXPOSE 8080
+
+export JAVA_HOME=/usr/lib/jvm/msopenjdk-current/bin/java
+export PATH=$JAVA_HOME/bin:$PATH
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
