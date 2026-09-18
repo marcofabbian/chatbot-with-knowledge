@@ -1,4 +1,4 @@
-package com.example.chatbot
+package com.marcofabbian.chatbot
 
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.ClassPathResource
@@ -25,3 +25,4 @@ class ChatbotController {
             .body(page)
     }
 }
+

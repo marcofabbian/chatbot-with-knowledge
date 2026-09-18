@@ -1,4 +1,4 @@
-package com.example.chatbot
+package com.marcofabbian.chatbot
 
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName

@@ -5,12 +5,12 @@ plugins {
     kotlin("plugin.spring") version "1.9.24"
 }
 
-group = "com.example.chatbot"
+group = "com.marcofabbian.chatbot"
 version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(20))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
 

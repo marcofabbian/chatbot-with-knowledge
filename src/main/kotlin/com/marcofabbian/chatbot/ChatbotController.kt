@@ -1,4 +1,4 @@
-package com.example.chatbot
+package com.marcofabbian.chatbot
 
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.ClassPathResource
@@ -13,6 +13,19 @@ class ChatbotController {
 
     private val logger = LoggerFactory.getLogger(ChatbotController::class.java)
 
+    fun constructor() {
+        logger.info("ChatbotController initialized")
+    }
+
+    @GetMapping("/about")
+    fun about(): ResponseEntity<String> {
+        logger.info("Loading about page")
+        val message = "This chatbot helps answer questions using the project knowledge base."
+        return ResponseEntity.ok()
+            .contentType(MediaType.TEXT_PLAIN)
+            .body(message)
+    }
+
     /**
      * Loads and displays the chatbot page (static/index.html).
      */
@@ -25,3 +38,4 @@ class ChatbotController {
             .body(page)
     }
 }
+

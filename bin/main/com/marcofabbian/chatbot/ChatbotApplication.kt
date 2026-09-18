@@ -1,4 +1,4 @@
-package com.example.chatbot
+package com.marcofabbian.chatbot
 
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
