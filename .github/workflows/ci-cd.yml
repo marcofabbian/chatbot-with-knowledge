@@ -43,11 +43,21 @@ jobs:
         run: docker build --tag "${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}" .
 
       - name: Scan image with Grype
+        id: scan
         uses: anchore/scan-action@v6
         with:
           image: "${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}"
           fail-build: true
           severity-cutoff: high
+          output-format: sarif
+
+      - name: Upload Grype vulnerability report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: grype-report
+          path: ${{ steps.scan.outputs.sarif }}
+          retention-days: 30
 
       - name: Log in to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
