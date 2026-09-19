@@ -36,7 +36,7 @@ jobs:
       - name: Define image metadata
         id: image
         run: |
-          echo "name=${{ secrets.DOCKERHUB_USERNAME }}/chatbot-with-knowledge" >> "$GITHUB_OUTPUT"
+          echo "name=marcofabbian/chatbot" >> "$GITHUB_OUTPUT"
           echo "tag=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Build Docker image
