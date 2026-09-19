@@ -1,7 +1,7 @@
 # Multi-stage build for Kotlin Spring Boot application
 
 # Stage 1: Build the application
-FROM mcr.microsoft.com/devcontainers/java:1-21-bookworm AS builder
+FROM mcr.microsoft.com/devcontainers/java:1-17-bookworm AS builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ COPY src /app/src
 RUN ./gradlew bootJar --no-daemon -x test
 
 # Stage 2: Minimal runtime image
-FROM mcr.microsoft.com/devcontainers/java:1-21-bookworm
+FROM mcr.microsoft.com/devcontainers/java:1-17-bookworm
 
 WORKDIR /app
 
@@ -28,8 +28,5 @@ USER spring:spring
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 EXPOSE 8080
-
-export JAVA_HOME=/usr/lib/jvm/msopenjdk-current/bin/java
-export PATH=$JAVA_HOME/bin:$PATH
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
