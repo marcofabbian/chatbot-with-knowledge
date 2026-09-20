@@ -49,8 +49,7 @@ jobs:
           image: "${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}"
           fail-build: true
           severity-cutoff: high
-          output-format: json
-          output-file: grype-report.json
+          output-format: table
           #output-format: sarif
 
       - name: Upload Grype vulnerability report
