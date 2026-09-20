@@ -50,15 +50,6 @@ jobs:
           fail-build: true
           severity-cutoff: high
           output-format: table
-          #output-format: sarif
-
-      - name: Upload Grype vulnerability report
-        if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: grype-report
-          path: ${{ steps.scan.outputs.sarif }}
-          retention-days: 1
 
       - name: Log in to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
