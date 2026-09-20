@@ -1,0 +1,114 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-scan-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x gradlew
+
+      - name: Clean build directories
+        run: ./gradlew clean --no-daemon
+
+      - name: Build project and run unit tests
+        run: ./gradlew build --no-daemon
+
+      - name: Define image metadata
+        id: image
+        run: |
+          echo "name=marcofabbian/chatbot" >> "$GITHUB_OUTPUT"
+          echo "tag=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Docker image
+        run: docker build --tag "${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}" .
+
+      - name: Scan image with Grype
+        id: scan
+        uses: anchore/scan-action@v6
+        with:
+          image: "${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}"
+          fail-build: false
+          severity-cutoff: high
+          output-format: json
+
+      - name: Display High and Critical vulnerabilities
+        run: |
+          echo
+          echo "=============================================================="
+          echo "        HIGH AND CRITICAL VULNERABILITIES"
+          echo "=============================================================="
+
+          jq -r '
+            .matches[]
+            | select(
+                (.vulnerability.severity == "Critical" or
+                .vulnerability.severity == "High") and
+                .artifact.type == "java-archive"
+              )
+            | [
+                .artifact.name,
+                .artifact.version,
+                .artifact.type,
+                .vulnerability.id,
+                .vulnerability.severity,
+                (.vulnerability.fix.versions // [] | join(", "))
+              ]
+            | @tsv
+          ' "${{ steps.scan.outputs.json }}" |
+          sort -t$'\t' -k5,5 -k1,1 |
+          awk -F '\t' '
+            BEGIN {
+              printf "%-35s %-18s %-12s %-20s %-10s %s\n",
+                "LIBRARY", "VERSION", "TYPE", "VULNERABILITY", "SEVERITY", "FIXED IN"
+
+                printf  "%-35s %-18s %-12s %-20s %-10s %s\n", 
+                        "-----------------------------------", 
+                        "------------------", 
+                        "------------", 
+                        "--------------------", 
+                        "----------", 
+                        "--------------------"
+            }
+
+            {
+              printf "%-35s %-18s %-12s %-20s %-10s %s\n",
+                $1, $2, $3, $4, $5, $6
+            }
+          '
+
+          echo
+          echo "================================================================================"
+
+      - name: Log in to Docker Hub
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Publish Docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker push "${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}"
+          docker tag "${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}" "${{ steps.image.outputs.name }}:latest"
+          docker push "${{ steps.image.outputs.name }}:latest"
