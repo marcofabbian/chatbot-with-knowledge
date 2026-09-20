@@ -51,22 +51,56 @@ jobs:
           severity-cutoff: high
           output-format: json
 
-      - name: Show Critical vulnerabilities 
-        run: | 
-          echo "=== CRITICAL VULNERABILITIES ==="
+      - name: Display High and Critical vulnerabilities
+        run: |
+          echo
+          echo "=============================================================="
+          echo "        HIGH AND CRITICAL VULNERABILITIES"
+          echo "=============================================================="
 
-          cat "${{ steps.scan.outputs.json }}" | jq -r ' 
-            .matches[] 
-            | select(.vulnerability.severity == "Critical") 
-            | [ 
-                .artifact.name, 
-                .artifact.version, 
-                .vulnerability.id, 
-                .vulnerability.severity, 
-                (.vulnerability.fix.versions // [] | join(", ")) 
-              ] 
-            | @tsv 
+          jq -r '
+            .matches[]
+            | select(
+                .vulnerability.severity == "Critical" or
+                .vulnerability.severity == "High"
+              )
+            | [
+                .artifact.name,
+                .artifact.version,
+                .vulnerability.id,
+                .vulnerability.severity,
+                (.vulnerability.fix.versions // [] | join(", "))
+              ]
+            | @json
+          ' "${{ steps.scan.outputs.report }}" |
+          while read -r line; do
+            jq -r -j '
+              .[0], "\t",
+              .[1], "\t",
+              .[2], "\t",
+              .[3], "\t",
+              .[4], "\n"
+            ' <<< "$line"
+          done |
+          awk -F '\t' '
+            BEGIN {
+              printf "%-30s %-18s %-20s %-10s %s\n",
+                    "PACKAGE", "VERSION", "VULNERABILITY", "SEVERITY", "FIXED IN"
+              printf "%-30s %-18s %-20s %-10s %s\n",
+                    "------------------------------",
+                    "------------------",
+                    "--------------------",
+                    "----------",
+                    "--------------------"
+            }
+            {
+              printf "%-30s %-18s %-20s %-10s %s\n",
+                    $1, $2, $3, $4, $5
+            }
           '
+
+          echo
+          echo "=============================================================="
 
       - name: Log in to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
