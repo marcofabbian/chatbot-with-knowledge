@@ -50,11 +50,12 @@ jobs:
           fail-build: false
           severity-cutoff: high
           output-format: json
+
       - name: Show Critical vulnerabilities 
         run: | 
           echo "=== CRITICAL VULNERABILITIES ==="
 
-          cat "${{ steps.scan.outputs.report }}" | jq -r ' 
+          cat "${{ steps.scan.outputs.json }}" | jq -r ' 
             .matches[] 
             | select(.vulnerability.severity == "Critical") 
             | [ 
