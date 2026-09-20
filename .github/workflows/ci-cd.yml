@@ -49,7 +49,23 @@ jobs:
           image: "${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}"
           fail-build: false
           severity-cutoff: high
-          output-format: table
+          output-format: json
+      - name: Show Critical vulnerabilities 
+        run: | 
+          echo "=== CRITICAL VULNERABILITIES ==="
+
+          cat "${{ steps.scan.outputs.report }}" | jq -r ' 
+            .matches[] 
+            | select(.vulnerability.severity == "Critical") 
+            | [ 
+                .artifact.name, 
+                .artifact.version, 
+                .vulnerability.id, 
+                .vulnerability.severity, 
+                (.vulnerability.fix.versions // [] | join(", ")) 
+              ] 
+            | @tsv 
+          '
 
       - name: Log in to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
