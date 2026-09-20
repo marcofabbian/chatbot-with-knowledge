@@ -72,7 +72,7 @@ jobs:
                 (.vulnerability.fix.versions // [] | join(", "))
               ]
             | @json
-          ' "${{ steps.scan.outputs.report }}" |
+          ' "${{ steps.scan.outputs.json }}" |
           while read -r line; do
             jq -r -j '
               .[0], "\t",
