@@ -14,9 +14,7 @@
         </header>
 
         <section class="chat-card" aria-label="Chatbot">
-            <!-- Area where the answers will be written -->
             <div id="answers" class="answers" aria-live="polite">
-                <!-- Example question & answer -->
                 <div class="qa-pair">
                     <div class="message message--question">
                         <span class="message-label">You</span>
@@ -24,9 +22,9 @@
                     </div>
                     <div class="message message--answer">
                         <span class="message-label">Chatbot</span>
-                        <p>This chatbot provide answer regarding the following topics : 
+                        <p>This chatbot provides answers regarding the following topics:
                             <ul>
-                                <li>Custody Clearing an services</li>
+                                <li>Custody clearing services</li>
                                 <li>Securities trade lifecycle</li>
                                 <li>Clearing and settlements</li>
                             </ul>
@@ -35,18 +33,112 @@
                 </div>
             </div>
 
-            <!-- Textbox where to write questions -->
-            <form class="question-form" action="#" method="post">
+            <form id="question-form" class="question-form" novalidate>
                 <label class="visually-hidden" for="question">Your question</label>
                 <textarea id="question" name="question" class="question-input" rows="3"
                           placeholder="Type your question here..." required></textarea>
-                <button type="submit" class="send-button">Send</button>
+                <button id="send-button" type="submit" class="send-button">Send</button>
             </form>
+            <p id="error-message" class="error-message" role="alert" aria-live="assertive"></p>
         </section>
 
         <footer class="page-footer">
             <small>&copy; 2026 Chatbot with Knowledge</small>
         </footer>
     </main>
+
+    <script>
+        const form = document.getElementById('question-form');
+        const questionInput = document.getElementById('question');
+        const answers = document.getElementById('answers');
+        const errorMessage = document.getElementById('error-message');
+        const sendButton = document.getElementById('send-button');
+
+        function addMessage(sender, text) {
+            const qaPair = document.createElement('div');
+            qaPair.className = 'qa-pair';
+
+            const questionWrapper = document.createElement('div');
+            questionWrapper.className = 'message message--question';
+            questionWrapper.innerHTML = '<span class="message-label">You</span><p></p>';
+            questionWrapper.querySelector('p').textContent = sender === 'You' ? text : '';
+
+            const answerWrapper = document.createElement('div');
+            answerWrapper.className = 'message message--answer';
+            answerWrapper.innerHTML = '<span class="message-label">Chatbot</span><p></p>';
+            answerWrapper.querySelector('p').textContent = sender === 'Chatbot' ? text : '';
+
+            if (sender === 'You') {
+                qaPair.appendChild(questionWrapper);
+            }
+            if (sender === 'Chatbot') {
+                qaPair.appendChild(answerWrapper);
+            }
+
+            answers.appendChild(qaPair);
+        }
+
+        function renderQuestionAndAnswer(question, answer) {
+            const qaPair = document.createElement('div');
+            qaPair.className = 'qa-pair';
+
+            const questionBlock = document.createElement('div');
+            questionBlock.className = 'message message--question';
+            questionBlock.innerHTML = '<span class="message-label">You</span>';
+            const questionText = document.createElement('p');
+            questionText.textContent = question;
+            questionBlock.appendChild(questionText);
+
+            const answerBlock = document.createElement('div');
+            answerBlock.className = 'message message--answer';
+            answerBlock.innerHTML = '<span class="message-label">Chatbot</span>';
+            const answerText = document.createElement('p');
+            answerText.textContent = answer;
+            answerBlock.appendChild(answerText);
+
+            qaPair.appendChild(questionBlock);
+            qaPair.appendChild(answerBlock);
+            answers.appendChild(qaPair);
+        }
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const question = questionInput.value.trim();
+
+            if (!question) {
+                errorMessage.textContent = 'Please enter a question before sending.';
+                questionInput.focus();
+                return;
+            }
+
+            errorMessage.textContent = '';
+            sendButton.disabled = true;
+            sendButton.textContent = 'Sending...';
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Unable to get a response from the chatbot.');
+                }
+
+                renderQuestionAndAnswer(question, data.answer);
+                form.reset();
+            } catch (error) {
+                errorMessage.textContent = error.message || 'Something went wrong while contacting the chatbot.';
+            } finally {
+                sendButton.disabled = false;
+                sendButton.textContent = 'Send';
+            }
+        });
+    </script>
 </body>
 </html>
