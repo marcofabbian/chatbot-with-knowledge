@@ -73,7 +73,7 @@ jobs:
                 (.vulnerability.fix.versions // [] | join(", "))
               ]
             | @tsv
-          ' "${{ steps.scan.outputs.report }}" |
+          ' "${{ steps.scan.outputs.json }}" |
           sort -t$'\t' -k5,5 -k1,1 |
           awk -F '\t' '
             BEGIN {
