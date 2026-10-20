@@ -11,6 +11,7 @@
             "name": "JavaSE-17",
             "path": "/usr/lib/jvm/msopenjdk-current",
             "default": true
+            
           }
         ],
         "kotlin.compiler.jvm.target": "17"
