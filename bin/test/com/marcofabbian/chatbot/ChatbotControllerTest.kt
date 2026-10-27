@@ -1,8 +1,10 @@
 package com.marcofabbian.chatbot
 
-import org.junit.jupiter.api.Assertions.assertEquals
+import com.marcofabbian.chatbot.config.ChatbotProperties
+import com.marcofabbian.chatbot.provider.MockChatProvider
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
@@ -14,6 +16,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @WebMvcTest(ChatbotController::class)
 @Import(ChatbotService::class, MockChatProvider::class)
+@EnableConfigurationProperties(ChatbotProperties::class)
 class ChatbotControllerTest(
     @Autowired private val mockMvc: MockMvc
 ) {
@@ -27,21 +30,30 @@ class ChatbotControllerTest(
         )
             .andExpect(status().isOk)
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.answer").value("Mock answer: 'What is custody and clearing?' -> This chatbot can explain custody and clearing services in the securities trade lifecycle."))
+            .andExpect(jsonPath("$.answer").value("Mock answer: This chatbot can explain custody and clearing services in the securities trade lifecycle."))
     }
 
     @Test
     fun `blank question returns bad request`() {
-        val response = mockMvc.perform(
+        mockMvc.perform(
             post("/api/chat")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""{"question":"   "}""")
         )
             .andExpect(status().isBadRequest)
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-            .andReturn()
+            .andExpect(jsonPath("$.error").value("Question must not be blank"))
+    }
 
-        val body = response.response.contentAsString
-        assertEquals(true, body.contains("Question must not be blank"))
+    @Test
+    fun `too long question returns bad request`() {
+        val longQuestion = "a".repeat(1001)
+        mockMvc.perform(
+            post("/api/chat")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"question":"$longQuestion"}""")
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.error").value("Question must be at most 1000 characters"))
     }
 }

@@ -25,6 +25,12 @@ dependencies {
     // Spring Boot Web Starter (serves the chatbot page)
     implementation("org.springframework.boot:spring-boot-starter-web")
 
+    // Actuator: /actuator/health for liveness/readiness checks
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+
+    // JSR-380 bean validation for request DTOs
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+
     // Kotlin reflection support
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
