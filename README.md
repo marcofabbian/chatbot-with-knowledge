@@ -25,6 +25,20 @@ The mock provider is active in the `default`, `local` and `test` profiles and re
 
 The application fails at startup if the prod profile is active without `OPENAI_API_KEY`. Set a hard monthly spend limit on the key in the OpenAI dashboard.
 
+## Running the container
+
+The key is never baked into the image. `.env` is excluded from the build context by `.dockerignore`, and the key is injected at run time as an environment variable.
+
+Local (`.env` at the repository root, unquoted `KEY=value` lines):
+
+```bash
+docker build -t chatbot-with-knowledge .
+docker run --rm -p 8080:8080 --env-file .env -e SPRING_PROFILES_ACTIVE=prod chatbot-with-knowledge
+curl http://localhost:8080/actuator/health
+```
+
+Azure Container Apps: store the key as a Container App secret (for example named `openai-api-key`) and map it to the environment variable `OPENAI_API_KEY` with `secretRef`, together with `SPRING_PROFILES_ACTIVE=prod`. The application reads the same variable name in both cases, so no code change is needed.
+
 ## Backend endpoint
 
 POST `/api/chat`
