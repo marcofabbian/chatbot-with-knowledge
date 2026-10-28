@@ -19,3 +19,6 @@ out/
 
 ### DEVPODS ###
 bin/
+
+### ENV vars ###
+*.env

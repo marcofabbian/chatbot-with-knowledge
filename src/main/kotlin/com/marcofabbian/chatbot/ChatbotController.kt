@@ -3,7 +3,6 @@ package com.marcofabbian.chatbot
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseBody
+import jakarta.validation.Valid
 
 @Controller
 class ChatbotController(
@@ -34,19 +34,12 @@ class ChatbotController(
 
     @PostMapping("/api/chat")
     @ResponseBody
-    fun askQuestion(@RequestBody request: ChatbotRequest): ResponseEntity<Any> {
-        logger.info("Received question: {}", request.question)
-
-        return try {
-            val answer = chatbotService.answerQuestion(request.question)
-            ResponseEntity.status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(ChatbotResponse(answer))
-        } catch (e: IllegalArgumentException) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(ChatbotErrorResponse(e.message ?: "Question must not be blank"))
-        }
+    fun askQuestion(@Valid @RequestBody request: ChatbotRequest): ResponseEntity<ChatbotResponse> {
+        logger.info("Received question, length={}", request.question.length)
+        val answer = chatbotService.answerQuestion(request.question)
+        return ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(ChatbotResponse(answer))
     }
 
     /**

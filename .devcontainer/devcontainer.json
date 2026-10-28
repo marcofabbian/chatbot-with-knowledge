@@ -25,6 +25,7 @@
     }
   },
   "forwardPorts": [8080],
-  "postCreateCommand": "./gradlew bootRun",
+  "postCreateCommand": "./gradlew assemble -x test",
+  "postStartCommand": "nohup ./gradlew bootRun > /tmp/chatbot-with-knowledge.log 2>&1 < /dev/null &",
   "remoteUser": "vscode"
 }
