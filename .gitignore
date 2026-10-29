@@ -22,3 +22,6 @@ bin/
 
 ### ENV vars ###
 *.env
+
+### PDF file ###
+*.pdf
