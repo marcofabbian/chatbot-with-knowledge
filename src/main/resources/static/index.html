@@ -22,13 +22,7 @@
                     </div>
                     <div class="message message--answer">
                         <span class="message-label">Chatbot</span>
-                        <p>This chatbot provides answers regarding the following topics:
-                            <ul>
-                                <li>Custody clearing services</li>
-                                <li>Securities trade lifecycle</li>
-                                <li>Clearing and settlements</li>
-                            </ul>
-                        </p>
+                        <p>This chatbot uses the historical book <em>How to Invest Money</em> to discuss investment principles, bonds and stocks. It is not current financial advice.</p>
                     </div>
                 </div>
             </div>
@@ -36,8 +30,8 @@
             <form id="question-form" class="question-form" novalidate>
                 <label class="visually-hidden" for="question">Your question</label>
                 <textarea id="question" name="question" class="question-input" rows="3"
-                          placeholder="Type your question here..." required></textarea>
-                <button id="send-button" type="submit" class="send-button">Send</button>
+                          placeholder="Type your question here..." required disabled></textarea>
+                <button id="send-button" type="submit" class="send-button" disabled>Send</button>
             </form>
             <p id="error-message" class="error-message" role="alert" aria-live="assertive"></p>
         </section>
@@ -53,6 +47,27 @@
         const answers = document.getElementById('answers');
         const errorMessage = document.getElementById('error-message');
         const sendButton = document.getElementById('send-button');
+        let knowledgeAvailable = false;
+
+        async function checkKnowledgeStatus() {
+            try {
+                const response = await fetch('/api/knowledge/status', { cache: 'no-store' });
+                if (!response.ok) throw new Error('Status unavailable');
+                const status = await response.json();
+                if (typeof status.available !== 'boolean') throw new Error('Invalid status');
+                knowledgeAvailable = status.available;
+                if (!knowledgeAvailable) {
+                    errorMessage.textContent = 'The knowledge base is unavailable. Questions are disabled until it is restored.';
+                }
+            } catch (error) {
+                knowledgeAvailable = false;
+                errorMessage.textContent = 'Unable to check the knowledge base. Questions are disabled.';
+            }
+            questionInput.disabled = !knowledgeAvailable;
+            sendButton.disabled = !knowledgeAvailable;
+        }
+
+        checkKnowledgeStatus();
 
         function addMessage(sender, text) {
             const qaPair = document.createElement('div');
@@ -103,6 +118,7 @@
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
+            if (!knowledgeAvailable) return;
             const question = questionInput.value.trim();
 
             if (!question) {
@@ -127,6 +143,7 @@
                 const data = await response.json();
 
                 if (!response.ok) {
+                    if (response.status === 503) await checkKnowledgeStatus();
                     throw new Error(data.error || 'Unable to get a response from the chatbot.');
                 }
 
@@ -135,7 +152,7 @@
             } catch (error) {
                 errorMessage.textContent = error.message || 'Something went wrong while contacting the chatbot.';
             } finally {
-                sendButton.disabled = false;
+                sendButton.disabled = !knowledgeAvailable;
                 sendButton.textContent = 'Send';
             }
         });

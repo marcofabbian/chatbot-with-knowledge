@@ -34,6 +34,9 @@ dependencies {
     // Kotlin reflection support
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
+    // Parse the Project Gutenberg HTML into page-aware knowledge passages.
+    implementation("org.jsoup:jsoup:1.18.3")
+
     // Logback Logging Framework
     implementation("ch.qos.logback:logback-classic:1.5.7")
 
