@@ -2,6 +2,7 @@ package com.marcofabbian.chatbot.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.web.client.RestClient
 
@@ -13,6 +14,7 @@ import org.springframework.web.client.RestClient
 class RestClientConfig {
 
     @Bean
+    @Primary
     fun restClientBuilder(properties: ChatbotProperties): RestClient.Builder {
         val requestFactory = SimpleClientHttpRequestFactory().apply {
             setConnectTimeout(properties.openai.connectTimeout.toMillis().toInt())

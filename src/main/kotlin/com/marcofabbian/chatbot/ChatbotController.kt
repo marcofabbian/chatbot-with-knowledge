@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
 import org.springframework.http.MediaType
+import org.springframework.http.CacheControl
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
@@ -32,6 +33,11 @@ class ChatbotController(
             .body(message)
     }
 
+    @GetMapping("/api/knowledge/status")
+    @ResponseBody
+    fun knowledgeStatus(): ResponseEntity<KnowledgeStatus> =
+        ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(KnowledgeStatus(chatbotService.knowledgeAvailable))
+
     @PostMapping("/api/chat")
     @ResponseBody
     fun askQuestion(@Valid @RequestBody request: ChatbotRequest): ResponseEntity<ChatbotResponse> {
@@ -41,6 +47,8 @@ class ChatbotController(
             .contentType(MediaType.APPLICATION_JSON)
             .body(ChatbotResponse(answer))
     }
+
+    data class KnowledgeStatus(val available: Boolean)
 
     /**
      * Loads and displays the chatbot page (static/index.html).
@@ -54,4 +62,3 @@ class ChatbotController(
             .body(page)
     }
 }
-
