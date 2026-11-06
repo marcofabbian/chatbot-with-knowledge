@@ -2,20 +2,29 @@ package com.marcofabbian.chatbot
 
 import com.marcofabbian.chatbot.config.ChatbotProperties
 import com.marcofabbian.chatbot.provider.MockChatProvider
+import com.marcofabbian.chatbot.provider.ChatProvider
+import com.marcofabbian.chatbot.knowledge.KnowledgeLoader
+import com.marcofabbian.chatbot.knowledge.KnowledgeNotFoundException
+import com.marcofabbian.chatbot.knowledge.KnowledgePassage
+import com.marcofabbian.chatbot.knowledge.KnowledgeUnavailableException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 
 class ChatbotServiceTest {
 
-    private val service = ChatbotService(MockChatProvider(), ChatbotProperties())
+    private val knowledge = Mockito.mock(KnowledgeLoader::class.java)
+    private val service = ChatbotService(MockChatProvider(), ChatbotProperties(), knowledge)
 
     @Test
     fun `service returns the provider answer for a valid question`() {
-        val result = service.answerQuestion("What is custody and clearing?")
+        Mockito.`when`(knowledge.search("What are bonds?"))
+            .thenReturn(listOf(KnowledgePassage("Book", 7, "Bonds are securities.", 1.0)))
+        val result = service.answerQuestion("What are bonds?")
 
         assertEquals(
-            "Mock answer: This chatbot can explain custody and clearing services in the securities trade lifecycle.",
+            "Mock excerpt (not an evaluated answer): Bonds are securities. [Book p.7]",
             result
         )
     }
@@ -40,11 +49,24 @@ class ChatbotServiceTest {
 
     @Test
     fun `service accepts a question exactly at the maximum length`() {
+        Mockito.`when`(knowledge.search("a".repeat(1000)))
+            .thenReturn(listOf(KnowledgePassage("Book", 7, "Text.", 1.0)))
         val result = service.answerQuestion("a".repeat(1000))
 
         assertEquals(
-            "Mock answer: This chatbot provides guidance on custody, clearing, settlement, and the securities trade lifecycle.",
+            "Mock excerpt (not an evaluated answer): Text. [Book p.7]",
             result
         )
+    }
+
+    @Test
+    fun `unavailable and unmatched knowledge never reach provider`() {
+        val provider = Mockito.mock(ChatProvider::class.java)
+        val guardedService = ChatbotService(provider, ChatbotProperties(), knowledge)
+        Mockito.`when`(knowledge.search("unavailable")).thenThrow(KnowledgeUnavailableException())
+        Mockito.`when`(knowledge.search("unmatched")).thenReturn(emptyList())
+        assertThrows(KnowledgeUnavailableException::class.java) { guardedService.answerQuestion("unavailable") }
+        assertThrows(KnowledgeNotFoundException::class.java) { guardedService.answerQuestion("unmatched") }
+        Mockito.verifyNoInteractions(provider)
     }
 }

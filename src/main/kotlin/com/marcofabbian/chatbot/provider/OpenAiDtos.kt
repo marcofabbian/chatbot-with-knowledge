@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class OpenAiChatRequest(
     val model: String,
     val messages: List<Message>,
-    @param:JsonProperty("max_tokens") val maxTokens: Int
+    @param:JsonProperty("max_completion_tokens") val maxCompletionTokens: Int
 ) {
     data class Message(val role: String, val content: String)
 }

@@ -1,6 +1,8 @@
 package com.marcofabbian.chatbot
 
 import com.marcofabbian.chatbot.config.ChatbotProperties
+import com.marcofabbian.chatbot.knowledge.KnowledgeLoader
+import com.marcofabbian.chatbot.knowledge.KnowledgeClientConfig
 import com.marcofabbian.chatbot.provider.ChatProvider
 import com.marcofabbian.chatbot.provider.MockChatProvider
 import com.marcofabbian.chatbot.provider.OpenAiChatProvider
@@ -16,15 +18,17 @@ import org.springframework.web.client.RestClient
 class ChatbotContextTest {
 
     @Configuration(proxyBeanMethods = false)
-    @Import(ChatbotService::class, MockChatProvider::class, OpenAiChatProvider::class)
+    @Import(ChatbotService::class, MockChatProvider::class, OpenAiChatProvider::class, KnowledgeLoader::class, KnowledgeClientConfig::class)
     @EnableConfigurationProperties(ChatbotProperties::class)
     class TestConfig {
         @Bean
+        @org.springframework.context.annotation.Primary
         fun restClientBuilder(): RestClient.Builder = RestClient.builder()
     }
 
     private val runner = ApplicationContextRunner()
         .withUserConfiguration(TestConfig::class.java)
+        .withPropertyValues("chatbot.knowledge.enabled=false")
 
     @Test
     fun `default profile wires the mock provider`() {

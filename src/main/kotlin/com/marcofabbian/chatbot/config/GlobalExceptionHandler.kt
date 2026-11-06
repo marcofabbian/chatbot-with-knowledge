@@ -2,6 +2,8 @@ package com.marcofabbian.chatbot.config
 
 import com.marcofabbian.chatbot.ChatbotErrorResponse
 import com.marcofabbian.chatbot.provider.ChatProviderException
+import com.marcofabbian.chatbot.knowledge.KnowledgeNotFoundException
+import com.marcofabbian.chatbot.knowledge.KnowledgeUnavailableException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -38,8 +40,17 @@ class GlobalExceptionHandler {
             ChatProviderException.Reason.UPSTREAM -> HttpStatus.BAD_GATEWAY to "The AI service is not available"
             ChatProviderException.Reason.MALFORMED -> HttpStatus.BAD_GATEWAY to "The AI service returned an unexpected response"
         }
+
         return error(status, message)
     }
+
+    @ExceptionHandler(KnowledgeUnavailableException::class)
+    fun knowledgeUnavailable(): ResponseEntity<ChatbotErrorResponse> =
+        error(HttpStatus.SERVICE_UNAVAILABLE, "The knowledge base is unavailable. Please try again after it has been restored.")
+
+    @ExceptionHandler(KnowledgeNotFoundException::class)
+    fun knowledgeNotFound(): ResponseEntity<ChatbotErrorResponse> =
+        error(HttpStatus.UNPROCESSABLE_ENTITY, "The answer was not found in our knowledge base.")
 
     private fun error(status: HttpStatus, message: String): ResponseEntity<ChatbotErrorResponse> =
         ResponseEntity.status(status)
