@@ -94,8 +94,10 @@
         }
 
         const CITATION = /\[[^\[\]\r\n]+ p\.\d+\]/g;
-        function scrollToEnd() {
-            answers.scrollTop = answers.scrollHeight;
+        // Scrolls the answers list so the given question/answer pair starts at the top of the view.
+        function scrollToPair(qaPair) {
+            const offset = qaPair.getBoundingClientRect().top - answers.getBoundingClientRect().top;
+            answers.scrollTo({ top: answers.scrollTop + offset - 8, behavior: 'smooth' });
         }
         // Logs the question immediately and returns the pending answer paragraph holder.
         function appendQuestion(question) {
@@ -116,7 +118,7 @@
             qaPair.appendChild(questionBlock);
             qaPair.appendChild(answerBlock);
             answers.appendChild(qaPair);
-            scrollToEnd();
+            scrollToPair(qaPair);
             return { qaPair, answerBlock, answerText };
         }
         // One line per sentence/line; each distinct source is listed only once at the end.
@@ -138,7 +140,7 @@
                 p.textContent = 'Source: ' + sources.join(' ');
                 target.answerBlock.appendChild(p);
             }
-            scrollToEnd();
+            scrollToPair(target.qaPair);
         }
         // Enter submits; Shift+Enter inserts a newline.
         questionInput.addEventListener('keydown', (event) => {
