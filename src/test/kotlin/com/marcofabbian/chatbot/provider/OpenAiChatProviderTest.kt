@@ -1,7 +1,6 @@
 package com.marcofabbian.chatbot.provider
 
 import com.marcofabbian.chatbot.config.ChatbotProperties
-import com.marcofabbian.chatbot.knowledge.KnowledgeNotFoundException
 import com.marcofabbian.chatbot.knowledge.KnowledgePassage
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -177,34 +176,28 @@ class OpenAiChatProviderTest {
             OpenAiChatProvider(noKey, RestClient.builder())
         }
 
-        @Test
-        fun `refusal is returned as knowledge error without a generic answer`() {
+    }
+
+    @Test
+    fun `empty passages still call provider and accept uncited answers`() {
+        server.expect(requestTo("https://api.openai.com/v1/chat/completions"))
+            .andRespond(withSuccess("""{"choices":[{"message":{"content":"Beyond the book: general answer."}}]}""", MediaType.APPLICATION_JSON))
+        assertEquals("Beyond the book: general answer.", provider.answer("question", emptyList()))
+    }
+
+    @Test
+    fun `uncited answers are accepted`() {
+        server.expect(requestTo("https://api.openai.com/v1/chat/completions"))
+            .andRespond(withSuccess("""{"choices":[{"message":{"content":"Beyond the book: extra context."}}]}""", MediaType.APPLICATION_JSON))
+        assertEquals("Beyond the book: extra context.", provider.answer("question", passages))
+    }
+
+    @Test
+    fun `invented citations are rejected`() {
+        repeat(3) {
             server.expect(requestTo("https://api.openai.com/v1/chat/completions"))
-                .andRespond(withSuccess("""{"choices":[{"message":{"content":"[NOT_IN_KNOWLEDGE]"}}]}""", MediaType.APPLICATION_JSON))
-            assertThrows(KnowledgeNotFoundException::class.java) { provider.answer("question", passages) }
+                .andRespond(withSuccess("""{"choices":[{"message":{"content":"Answer [How to Invest Money p.99]"}}]}""", MediaType.APPLICATION_JSON))
         }
-
-        @Test
-        fun `empty passages do not call provider`() {
-            assertThrows(KnowledgeNotFoundException::class.java) { provider.answer("question", emptyList()) }
-        }
-
-        @Test
-        fun `invented citations are rejected`() {
-            repeat(3) {
-                server.expect(requestTo("https://api.openai.com/v1/chat/completions"))
-                    .andRespond(withSuccess("""{"choices":[{"message":{"content":"Answer [How to Invest Money p.99]"}}]}""", MediaType.APPLICATION_JSON))
-            }
-            assertThrows(ChatProviderException.Malformed::class.java) { provider.answer("question", passages) }
-        }
-
-        @Test
-        fun `uncited answers are rejected`() {
-            repeat(3) {
-                server.expect(requestTo("https://api.openai.com/v1/chat/completions"))
-                    .andRespond(withSuccess("""{"choices":[{"message":{"content":"An uncited answer"}}]}""", MediaType.APPLICATION_JSON))
-            }
-            assertThrows(ChatProviderException.Malformed::class.java) { provider.answer("question", passages) }
-        }
+        assertThrows(ChatProviderException.Malformed::class.java) { provider.answer("question", passages) }
     }
 }

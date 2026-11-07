@@ -1,6 +1,5 @@
 package com.marcofabbian.chatbot.provider
 
-import com.marcofabbian.chatbot.knowledge.KnowledgeNotFoundException
 import com.marcofabbian.chatbot.knowledge.KnowledgePassage
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -17,7 +16,8 @@ class MockChatProvider : ChatProvider {
     }
 
     override fun answer(question: String, passages: List<KnowledgePassage>): String {
-        val passage = passages.firstOrNull() ?: throw KnowledgeNotFoundException()
+        val passage = passages.firstOrNull()
+            ?: return "Mock answer (no matching book passage; the real provider would use wider knowledge)."
         return "Mock excerpt (not an evaluated answer): ${passage.text} ${passage.label}"
     }
 }
