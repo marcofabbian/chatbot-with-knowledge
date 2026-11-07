@@ -4,7 +4,6 @@ import com.marcofabbian.chatbot.config.ChatbotProperties
 import com.marcofabbian.chatbot.provider.MockChatProvider
 import com.marcofabbian.chatbot.provider.ChatProvider
 import com.marcofabbian.chatbot.knowledge.KnowledgeLoader
-import com.marcofabbian.chatbot.knowledge.KnowledgeNotFoundException
 import com.marcofabbian.chatbot.knowledge.KnowledgePassage
 import com.marcofabbian.chatbot.knowledge.KnowledgeUnavailableException
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -60,13 +59,20 @@ class ChatbotServiceTest {
     }
 
     @Test
-    fun `unavailable and unmatched knowledge never reach provider`() {
+    fun `unavailable knowledge never reaches provider`() {
         val provider = Mockito.mock(ChatProvider::class.java)
         val guardedService = ChatbotService(provider, ChatbotProperties(), knowledge)
         Mockito.`when`(knowledge.search("unavailable")).thenThrow(KnowledgeUnavailableException())
-        Mockito.`when`(knowledge.search("unmatched")).thenReturn(emptyList())
         assertThrows(KnowledgeUnavailableException::class.java) { guardedService.answerQuestion("unavailable") }
-        assertThrows(KnowledgeNotFoundException::class.java) { guardedService.answerQuestion("unmatched") }
         Mockito.verifyNoInteractions(provider)
+    }
+
+    @Test
+    fun `unmatched question is still sent to the provider with no passages`() {
+        val provider = Mockito.mock(ChatProvider::class.java)
+        val openService = ChatbotService(provider, ChatbotProperties(), knowledge)
+        Mockito.`when`(knowledge.search("unmatched")).thenReturn(emptyList())
+        Mockito.`when`(provider.answer("unmatched", emptyList())).thenReturn("Beyond the book: answer")
+        assertEquals("Beyond the book: answer", openService.answerQuestion("unmatched"))
     }
 }

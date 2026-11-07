@@ -2,7 +2,6 @@ package com.marcofabbian.chatbot
 
 import com.marcofabbian.chatbot.config.ChatbotProperties
 import com.marcofabbian.chatbot.knowledge.KnowledgeLoader
-import com.marcofabbian.chatbot.knowledge.KnowledgeNotFoundException
 import com.marcofabbian.chatbot.provider.ChatProvider
 import org.springframework.stereotype.Service
 
@@ -23,7 +22,7 @@ class ChatbotService(
             throw QuestionTooLongException(properties.maxQuestionLength)
         }
         val passages = knowledge.search(trimmedQuestion)
-        if (passages.isEmpty()) throw KnowledgeNotFoundException()
+        // The book is the starting point; with no matching passage the provider answers from its wider knowledge.
         return chatProvider.answer(trimmedQuestion, passages)
     }
 }

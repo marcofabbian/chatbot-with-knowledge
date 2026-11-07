@@ -60,11 +60,12 @@ class ChatbotControllerTest(
     }
 
     @Test
-    fun `unmatched question returns 422`() {
+    fun `unmatched question still returns an answer from wider knowledge`() {
         Mockito.`when`(knowledge.search("unmatched")).thenReturn(emptyList())
         mockMvc.perform(post("/api/chat").contentType(MediaType.APPLICATION_JSON).content("""{"question":"unmatched"}"""))
-            .andExpect(status().isUnprocessableEntity)
-            .andExpect(jsonPath("$.error").value("The answer was not found in our knowledge base."))
+            .andExpect(status().isOk)
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.answer").value("Mock answer (no matching book passage; the real provider would use wider knowledge)."))
     }
 
     @Test
