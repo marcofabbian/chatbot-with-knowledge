@@ -1,0 +1,8 @@
+# Deployment-oriented defaults (packaged on the classpath via build.gradle.kts).
+server:
+  shutdown: graceful
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true

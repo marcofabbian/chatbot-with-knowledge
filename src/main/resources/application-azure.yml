@@ -1,0 +1,10 @@
+# Active with SPRING_PROFILES_ACTIVE=azure (Azure Container Apps, West Europe).
+# OPENAI_API_KEY is injected from Key Vault via a Container Apps secret reference.
+server:
+  forward-headers-strategy: framework
+chatbot:
+  openai:
+    api-key: ${OPENAI_API_KEY}
+logging:
+  level:
+    root: INFO
