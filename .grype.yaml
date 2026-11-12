@@ -1,0 +1,9 @@
+ignore:
+  # Add temporary exceptions with explicit reason and expiry, for example:
+  # - vulnerability: CVE-2026-12345
+  #   package:
+  #     name: openssl
+  #   fix-state: fixed
+  #   reason: "Upstream fix not yet available in pinned base image; tracked in issue #123"
+  #   expires-on: 2026-12-31
+
