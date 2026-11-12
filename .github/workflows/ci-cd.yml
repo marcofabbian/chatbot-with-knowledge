@@ -51,7 +51,7 @@ jobs:
           only-fixed: true
           severity-cutoff: high
           output-format: json
-          grype-config: .grype.yaml
+          # .grype.yaml at the repo root is picked up automatically by grype.
 
       - name: Upload Grype report
         if: ${{ always() && steps.scan.outputs.json != '' }}
@@ -74,8 +74,7 @@ jobs:
             .matches[]
             | select(
                 (.vulnerability.severity == "Critical" or
-                .vulnerability.severity == "High") and
-                .artifact.type == "java-archive"
+                .vulnerability.severity == "High")
               )
             | [
                 .artifact.name,

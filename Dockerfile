@@ -9,13 +9,16 @@ RUN ./gradlew bootJar --no-daemon
 FROM eclipse-temurin:17-jre@sha256:0b6521287f850ec1c4b31c9074c5a1ae1d67c5922c3fefd21065c7c32e244d4a
 
 WORKDIR /app
-RUN addgroup --system spring && adduser --system --ingroup spring spring
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/* \
+    && addgroup --system spring && adduser --system --ingroup spring spring
 COPY --from=builder /app/build/libs/*.jar app.jar
 USER spring:spring
 
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
-  CMD java -cp /app/app.jar org.springframework.boot.loader.launch.JarLauncher --help >/dev/null 2>&1 || exit 1
+  CMD bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080 && printf "GET /actuator/health/liveness HTTP/1.0\r\n\r\n" >&3 && head -n1 <&3 | grep -q " 200 "' || exit 1
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
