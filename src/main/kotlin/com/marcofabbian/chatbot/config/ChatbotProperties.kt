@@ -35,7 +35,12 @@ data class ChatbotProperties(
         val maxOutputTokens: Int = 500,
         val connectTimeout: Duration = Duration.ofSeconds(5),
         val readTimeout: Duration = Duration.ofSeconds(30)
-    )
+    ) {
+        // Overridden so the generated data-class toString() never leaks the API key into logs.
+        override fun toString(): String =
+            "OpenAi(apiKey=${if (apiKey.isBlank()) "<empty>" else "***"}, baseUrl=$baseUrl, model=$model, " +
+                "maxOutputTokens=$maxOutputTokens, connectTimeout=$connectTimeout, readTimeout=$readTimeout)"
+    }
 
     data class RateLimit(
         @field:Min(1) @field:Max(1000)
@@ -57,8 +62,16 @@ data class ChatbotProperties(
         @field:Min(1) @field:Max(20)
         val topK: Int = 4,
         @field:Min(500) @field:Max(16000)
-        val maxContextChars: Int = 4000
+        val maxContextChars: Int = 4000,
+        val allowedHosts: List<String> = listOf("www.gutenberg.org")
     ) {
+        @AssertTrue(message = "source-url host must be in allowed-hosts")
+        fun isSourceHostAllowed(): Boolean = try {
+            URI(sourceUrl).host?.lowercase() in allowedHosts.map { it.lowercase() }
+        } catch (_: java.net.URISyntaxException) {
+            false
+        }
+
         @AssertTrue(message = "source-url must be an HTTPS URL without user info")
         fun isSourceUrlValid(): Boolean = try {
             val uri = URI(sourceUrl)

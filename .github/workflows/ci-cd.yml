@@ -47,11 +47,15 @@ jobs:
         uses: anchore/scan-action@v6
         with:
           image: "${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}"
-          fail-build: false
+          fail-build: true
+          only-fixed: true
           severity-cutoff: high
           output-format: json
 
+      # fail-build makes the scan step fail on findings; without this condition the report
+      # would be skipped exactly when it is needed. Guarded so it only runs if a report exists.
       - name: Display High and Critical vulnerabilities
+        if: ${{ !cancelled() && steps.scan.outputs.json != '' }}
         run: |
           echo
           echo "=============================================================="

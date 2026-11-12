@@ -22,8 +22,8 @@ class GlobalExceptionHandler {
     private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
     @ExceptionHandler(IllegalArgumentException::class, HttpMessageNotReadableException::class)
-    fun badRequest(e: Exception): ResponseEntity<ChatbotErrorResponse> =
-        error(HttpStatus.BAD_REQUEST, e.message ?: "Invalid request")
+    fun badRequest(): ResponseEntity<ChatbotErrorResponse> =
+        error(HttpStatus.BAD_REQUEST, "Invalid request")
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun validationFailure(e: MethodArgumentNotValidException): ResponseEntity<ChatbotErrorResponse> =

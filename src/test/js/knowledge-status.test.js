@@ -3,8 +3,8 @@ const path = require('node:path');
 const vm = require('node:vm');
 const assert = require('node:assert');
 
-const html = fs.readFileSync(path.join(__dirname, '../../main/resources/static/index.html'), 'utf8');
-const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
+const html = fs.readFileSync(path.join(__dirname, '../../main/resources/static/js/app.js'), 'utf8');
+const script = html;
 
 async function setup(responses) {
     const calls = [];

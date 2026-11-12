@@ -19,7 +19,7 @@
         </rollingPolicy>
     </appender>
 
-    <logger name="com.marcofabbian.chatbot" level="DEBUG"/>
+    <logger name="com.marcofabbian.chatbot" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
