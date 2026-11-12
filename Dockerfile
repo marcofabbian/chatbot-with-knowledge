@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk AS builder
+FROM eclipse-temurin:17-jdk@sha256:5465815640e10433422217335e15a523a3e57021a1f2ae0fc3849380d237979f AS builder
 
 WORKDIR /app
 COPY gradlew settings.gradle.kts build.gradle.kts ./
@@ -6,19 +6,16 @@ COPY gradle gradle
 COPY src src
 RUN ./gradlew bootJar --no-daemon
 
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre@sha256:0b6521287f850ec1c4b31c9074c5a1ae1d67c5922c3fefd21065c7c32e244d4a
 
 WORKDIR /app
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && addgroup --system spring && adduser --system --ingroup spring spring
+RUN addgroup --system spring && adduser --system --ingroup spring spring
 COPY --from=builder /app/build/libs/*.jar app.jar
 USER spring:spring
 
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
-  CMD curl -fs http://localhost:8080/actuator/health/liveness || exit 1
+  CMD java -cp /app/app.jar org.springframework.boot.loader.launch.JarLauncher --help >/dev/null 2>&1 || exit 1
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
