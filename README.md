@@ -121,3 +121,4 @@ node src/test/js/knowledge-status.test.js
 ## Provider implementations
 
 `ChatbotService` retrieves passages and talks to a `ChatProvider` interface. `MockChatProvider` (profiles `default`/`local`/`test`) returns deterministic excerpts for local development and tests. `OpenAiChatProvider` (profile `prod`) calls the OpenAI Chat Completions API and is wired only when `OPENAI_API_KEY` is set.
+
