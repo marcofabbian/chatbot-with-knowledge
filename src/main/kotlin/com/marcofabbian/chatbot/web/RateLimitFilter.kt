@@ -1,6 +1,7 @@
 package com.marcofabbian.chatbot.web
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.benmanes.caffeine.cache.Caffeine
 import com.marcofabbian.chatbot.ChatbotErrorResponse
 import com.marcofabbian.chatbot.config.ChatbotProperties
 import jakarta.servlet.FilterChain
@@ -12,12 +13,17 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import java.time.Clock
-import java.util.concurrent.ConcurrentHashMap
+import java.time.Duration
 
 /**
  * Per-client in-memory token bucket on POST /api/chat. Why in-memory: the app runs
  * with a small replica count, so a per-instance limit bounded by max_replicas is
  * acceptable; no external store is needed.
+ *
+ * The client key is the servlet remote address only. Behind a trusted proxy the
+ * container resolves it from X-Forwarded-For (server.forward-headers-strategy=native),
+ * so a caller cannot choose its own bucket by sending that header. Idle buckets
+ * expire and the cache is size-bounded, so memory cannot grow without limit.
  */
 @Component
 class RateLimitFilter(
@@ -29,7 +35,10 @@ class RateLimitFilter(
     private val capacity = properties.rateLimit.requestsPerMinute.toDouble()
     private val refillPerSecond = capacity / 60.0
 
-    private val buckets = ConcurrentHashMap<String, Bucket>()
+    private val buckets = Caffeine.newBuilder()
+        .maximumSize(MAX_TRACKED_CLIENTS)
+        .expireAfterAccess(IDLE_EXPIRY)
+        .build<String, Bucket>()
 
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -41,7 +50,7 @@ class RateLimitFilter(
             return
         }
 
-        val bucket = buckets.computeIfAbsent(clientKey(request)) { Bucket(capacity, nowSeconds()) }
+        val bucket = buckets.get(request.remoteAddr ?: "unknown") { Bucket(capacity, nowSeconds()) }
         if (bucket.tryConsume()) {
             filterChain.doFilter(request, response)
             return
@@ -57,10 +66,6 @@ class RateLimitFilter(
 
     private fun isChatRequest(request: HttpServletRequest): Boolean =
         request.method == "POST" && request.requestURI == "/api/chat"
-
-    private fun clientKey(request: HttpServletRequest): String =
-        request.getHeader("X-Forwarded-For")?.substringBefore(',')?.trim()?.takeIf { it.isNotEmpty() }
-            ?: request.remoteAddr
 
     private fun nowSeconds(): Double = clock.millis() / 1000.0
 
@@ -80,5 +85,10 @@ class RateLimitFilter(
                 false
             }
         }
+    }
+
+    private companion object {
+        const val MAX_TRACKED_CLIENTS = 10_000L
+        val IDLE_EXPIRY: Duration = Duration.ofMinutes(10)
     }
 }

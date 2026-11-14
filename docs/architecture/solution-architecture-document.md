@@ -343,7 +343,7 @@ flowchart LR
 
 - **Build:** multi-stage `Dockerfile` (`./gradlew bootJar`, then a Java 17 runtime image).
 - **Run:** `java -jar app.jar`; set `SPRING_PROFILES_ACTIVE=prod` and `OPENAI_API_KEY`.
-- **Scaling:** stateless, so it can run several replicas behind a load balancer. The rate limit and the index are per instance; each replica downloads the book at startup. Cloud deployment (Azure) is described in `docs/features/azure-cloud-deployment.md`.
+- **Scaling:** stateless, so it can run several replicas behind a load balancer. The rate limit and the index are per instance; each replica downloads the book at startup.
 - **Resources:** modest; the book index is a few MB of heap.
 
 ---
@@ -389,6 +389,6 @@ flowchart LR
 
 ## 13. References
 - Project Gutenberg ebook #34463, *How to Invest Money*
-- `README.md`, `docs/archived/*`, `docs/features/azure-cloud-deployment.md`, `docs/features/security-enhancement.md`
+- `README.md`, `docs/archived/*`
 - Spring Boot, Jsoup, OpenAI Chat Completions API documentation
 

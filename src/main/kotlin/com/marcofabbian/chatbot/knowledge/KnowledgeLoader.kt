@@ -22,7 +22,13 @@ class KnowledgeClientConfig {
     @Bean("knowledgeRestClientBuilder")
     fun knowledgeRestClientBuilder(properties: ChatbotProperties): RestClient.Builder {
         val timeout = properties.knowledge.fetchTimeout.toMillis().toInt()
-        val factory = SimpleClientHttpRequestFactory().apply {
+        // Redirects are not followed: the source must answer directly from the allowlisted host.
+        val factory = object : SimpleClientHttpRequestFactory() {
+            override fun prepareConnection(connection: java.net.HttpURLConnection, httpMethod: String) {
+                super.prepareConnection(connection, httpMethod)
+                connection.instanceFollowRedirects = false
+            }
+        }.apply {
             setConnectTimeout(timeout)
             setReadTimeout(timeout)
         }

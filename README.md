@@ -44,8 +44,6 @@ docker run --rm -p 8080:8080 --env-file .env -e SPRING_PROFILES_ACTIVE=prod chat
 curl http://localhost:8080/actuator/health
 ```
 
-Azure Container Apps: store the key as a Container App secret (for example named `openai-api-key`) and map it to the environment variable `OPENAI_API_KEY` with `secretRef`, together with `SPRING_PROFILES_ACTIVE=prod`. The application reads the same variable name in both cases, so no code change is needed.
-
 ## Backend endpoint
 
 POST `/api/chat`
@@ -123,3 +121,4 @@ node src/test/js/knowledge-status.test.js
 ## Provider implementations
 
 `ChatbotService` retrieves passages and talks to a `ChatProvider` interface. `MockChatProvider` (profiles `default`/`local`/`test`) returns deterministic excerpts for local development and tests. `OpenAiChatProvider` (profile `prod`) calls the OpenAI Chat Completions API and is wired only when `OPENAI_API_KEY` is set.
+

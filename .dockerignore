@@ -6,3 +6,8 @@ build
 *.jar
 .env
 *.env
+infra
+docs
+logs
+.github
+*.tfstate
