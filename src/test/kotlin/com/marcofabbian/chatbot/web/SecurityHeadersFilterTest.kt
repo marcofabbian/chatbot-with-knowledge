@@ -25,13 +25,24 @@ class SecurityHeadersFilterTest {
 
     @Test
     fun `adds security headers`() {
+        val request = MockHttpServletRequest("GET", "/about")
+        request.isSecure = true
+
         val response = MockHttpServletResponse()
-        filter.doFilter(MockHttpServletRequest("GET", "/about"), response, MockFilterChain())
+        filter.doFilter(request, response, MockFilterChain())
 
         assertTrue(response.getHeader("Content-Security-Policy")!!.contains("default-src 'self'"))
         assertEquals("nosniff", response.getHeader("X-Content-Type-Options"))
         assertEquals("DENY", response.getHeader("X-Frame-Options"))
         assertTrue(response.getHeader("Strict-Transport-Security")!!.startsWith("max-age="))
+    }
+
+    @Test
+    fun `does not add hsts on insecure requests`() {
+        val response = MockHttpServletResponse()
+        filter.doFilter(MockHttpServletRequest("GET", "/about"), response, MockFilterChain())
+
+        assertEquals(null, response.getHeader("Strict-Transport-Security"))
     }
 
     @Test
@@ -66,4 +77,3 @@ class SecurityHeadersFilterTest {
         assertEquals(String(payload), String(forwarded.inputStream.readAllBytes()))
     }
 }
-
