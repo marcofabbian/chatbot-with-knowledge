@@ -47,11 +47,26 @@ dependencies {
 
     // Jackson and Micrometer dependencies
     constraints {
-        implementation("com.fasterxml.jackson.core:jackson-core:2.21.7")
-        implementation("com.fasterxml.jackson.core:jackson-databind:2.21.7")
-        implementation("io.micrometer:micrometer-core:1.15.12")
-        implementation("org.springframework:spring-expression:6.2.19")
-        implementation("org.springframework:spring-webmvc:6.2.19")
+        implementation("com.fasterxml.jackson.core:jackson-core") {
+            version { strictly("2.21.7") }
+            because("Security fix requirement")
+        }
+        implementation("com.fasterxml.jackson.core:jackson-databind") {
+            version { strictly("2.21.7") }
+            because("Security fix requirement")
+        }
+        implementation("io.micrometer:micrometer-core") {
+            version { strictly("1.15.12") }
+            because("Security fix requirement")
+        }
+        implementation("org.springframework:spring-expression") {
+            version { strictly("6.2.19") }
+            because("Security fix requirement")
+        }
+        implementation("org.springframework:spring-webmvc") {
+            version { strictly("6.2.19") }
+            because("Security fix requirement")
+        }
     }
 
     // Test dependencies with JUnit Jupiter
@@ -67,4 +82,16 @@ tasks.withType<Test> {
 // Only the executable boot jar is needed; disabling the plain jar keeps build/libs/*.jar to one file for the Dockerfile COPY.
 tasks.named<Jar>("jar") {
     enabled = false
+}
+
+configurations.configureEach {
+    resolutionStrategy.eachDependency {
+        when ("${requested.group}:${requested.name}") {
+            "com.fasterxml.jackson.core:jackson-core" -> useVersion("2.21.7")
+            "com.fasterxml.jackson.core:jackson-databind" -> useVersion("2.21.7")
+            "io.micrometer:micrometer-core" -> useVersion("1.15.12")
+            "org.springframework:spring-expression" -> useVersion("6.2.19")
+            "org.springframework:spring-webmvc" -> useVersion("6.2.19")
+        }
+    }
 }
