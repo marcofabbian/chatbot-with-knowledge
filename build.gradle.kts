@@ -18,7 +18,7 @@ repositories {
     mavenCentral()
 }
 
-extra["tomcat.version"] = "10.1.60"
+extra["tomcat.version"] = "10.1.61"
 
 dependencies {
     // Spring Boot Starter
