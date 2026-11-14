@@ -1,5 +1,5 @@
 plugins {
-    id("org.springframework.boot") version "3.5.12"
+    id("org.springframework.boot") version "3.5.14"
     id("io.spring.dependency-management") version "1.1.6"
     kotlin("jvm") version "2.4.21"
     kotlin("plugin.spring") version "2.4.21"
@@ -44,6 +44,15 @@ dependencies {
 
     // Logback Logging Framework
     implementation("ch.qos.logback:logback-classic")
+
+    // Jackson and Micrometer dependencies
+    constraints {
+        implementation("com.fasterxml.jackson.core:jackson-core:2.21.7")
+        implementation("com.fasterxml.jackson.core:jackson-databind:2.21.7")
+        implementation("io.micrometer:micrometer-core:1.15.12")
+        implementation("org.springframework:spring-expression:6.2.19")
+        implementation("org.springframework:spring-webmvc:6.2.19")
+    }
 
     // Test dependencies with JUnit Jupiter
     testImplementation("org.springframework.boot:spring-boot-starter-test")
