@@ -37,7 +37,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     // Parse the Project Gutenberg HTML into page-aware knowledge passages.
-    implementation("org.jsoup:jsoup:1.23.2")
+    implementation("org.jsoup:jsoup:1.24.1")
 
     // Bounded, expiring per-client rate limit buckets (version managed by Spring Boot).
     implementation("com.github.ben-manes.caffeine:caffeine")
