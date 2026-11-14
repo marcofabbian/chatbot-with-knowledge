@@ -18,6 +18,8 @@ repositories {
     mavenCentral()
 }
 
+extra["tomcat.version"] = "10.1.60"
+
 dependencies {
     // Spring Boot Starter
     implementation("org.springframework.boot:spring-boot-starter")
