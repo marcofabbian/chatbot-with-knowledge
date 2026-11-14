@@ -44,7 +44,7 @@ jobs:
 
       - name: Scan image with Grype
         id: scan
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           image: "${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}"
           fail-build: true
