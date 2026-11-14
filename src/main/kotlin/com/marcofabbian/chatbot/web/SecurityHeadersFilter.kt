@@ -38,7 +38,9 @@ class SecurityHeadersFilter(
         response.setHeader("X-Content-Type-Options", "nosniff")
         response.setHeader("X-Frame-Options", "DENY")
         response.setHeader("Referrer-Policy", "no-referrer")
-        response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        if (request.isSecure) {
+            response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        }
 
         if (request.method == "POST" && request.requestURI == "/api/chat") {
             // Content-Length is absent for chunked requests, so the cap is enforced on the bytes
@@ -92,4 +94,3 @@ class SecurityHeadersFilter(
         const val CSP = "default-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
     }
 }
-
